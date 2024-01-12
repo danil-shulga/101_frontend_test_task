@@ -1,16 +1,23 @@
 import "fontsource-roboto";
-import { ApolloProvider } from "react-apollo";
-import { InMemoryCache } from "apollo-cache-inmemory";
-import { ApolloClient } from "apollo-client";
-import { HttpLink } from "apollo-link-http";
+import {
+  ApolloClient,
+  ApolloProvider,
+  InMemoryCache,
+  createHttpLink,
+} from "@apollo/client";
 import MainBar from "./Components/MainBar";
 import Page from "./Components/Page";
 
+const httpLink = createHttpLink({
+  uri: "https://stage.gql.101internet.ru",
+  fetch: fetch,
+  headers: {
+    Authorization: "Basic MTAxaW50ZXI6dGVzdDEwMQ==",
+  },
+});
+
 const client = new ApolloClient({
-  link: new HttpLink({
-    uri: "/gql",
-    fetch: fetch,
-  }),
+  link: httpLink,
   cache: new InMemoryCache(),
 });
 

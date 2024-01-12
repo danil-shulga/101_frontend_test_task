@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useQuery } from "react-apollo";
+import { useQuery } from "@apollo/client";
 import {
   Container,
   Typography,
@@ -14,7 +14,6 @@ import {
   TableCell,
   TableBody,
   Paper,
-  Divider,
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { PROVIDERS_QUERY } from "../Queries/providersQuery";
@@ -47,7 +46,6 @@ function Page() {
       offset: 0,
       sort: "name",
     },
-    notifyOnNetworkStatusChange: true,
   });
   const providersData = providers?.data?.providers?.data || [];
 
@@ -59,13 +57,12 @@ function Page() {
       offset: 0,
       sort: "name",
     },
-    notifyOnNetworkStatusChange: true,
   });
   const tariffsData = tariffs?.data?.tariffs?.data || [];
 
   const handleChange = (event) => {
     const foundProvider = providersData.find(
-      (x) => x.id === +event.target.value
+      (x) => x.id === +event.target.value,
     );
     if (foundProvider) {
       setCurrentProvider(foundProvider);
