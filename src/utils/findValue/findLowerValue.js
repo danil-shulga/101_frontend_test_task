@@ -1,0 +1,1 @@
+export const findLowerValue = (arr = []) => arr.sort((a, b) => a - b)[0];

@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useQuery } from "@apollo/client";
+import { useState } from 'react';
+import { useQuery } from '@apollo/client';
 import {
   Container,
   Typography,
@@ -14,12 +14,21 @@ import {
   TableCell,
   TableBody,
   Paper,
-} from "@material-ui/core";
-import { makeStyles } from "@material-ui/core/styles";
-import { PROVIDERS_QUERY } from "../Queries/providersQuery";
-import { TARIFFS_QUERY } from "../Queries/tariffsQuery";
+} from '@material-ui/core';
+import { makeStyles } from '@material-ui/core/styles';
+import { PROVIDERS_QUERY } from '../Queries/providersQuery';
+import { TARIFFS_QUERY } from '../Queries/tariffsQuery';
 
-const REGION_URL = "moskva";
+import { tariffsPriceDetails } from '../utils/tariffsDetails/tariffsPriceDetails';
+import { tariffsInternetDetails } from '../utils/tariffsDetails/tariffsInternetDetails';
+import { tariffsTV_Details } from '../utils/tariffsDetails/tariffsTV_Details';
+import { tariffsTV_HD_Details } from '../utils/tariffsDetails/tariffsTV_HD_Details';
+import { sortTariffsData } from '../utils/sort/sortTariffsData';
+import { sortByValue } from '../utils/sort/sortByValue';
+import { toggleValue } from '../utils/toggleValue';
+import BestTariffs from './BestTariffs';
+
+const REGION_URL = 'moskva';
 
 const useStyles = makeStyles((theme) => ({
   formControl: {
@@ -38,13 +47,14 @@ function Page() {
   const classes = useStyles();
 
   const [currentProvider, setCurrentProvider] = useState({});
+  const [sortValue, setSortValue] = useState('');
 
   const providers = useQuery(PROVIDERS_QUERY, {
     variables: {
       filter: `region.url=${REGION_URL}`,
       limit: 50,
       offset: 0,
-      sort: "name",
+      sort: 'name',
     },
   });
   const providersData = providers?.data?.providers?.data || [];
@@ -55,19 +65,28 @@ function Page() {
       filter: `region.url=${REGION_URL}&provider.url_name=${currentProvider.url_name}`,
       limit: 100,
       offset: 0,
-      sort: "name",
+      sort: 'name',
     },
   });
   const tariffsData = tariffs?.data?.tariffs?.data || [];
+  const sortedTariffsData = sortTariffsData(tariffsData);
 
   const handleChange = (event) => {
     const foundProvider = providersData.find(
-      (x) => x.id === +event.target.value,
+      (x) => x.id === +event.target.value
     );
     if (foundProvider) {
       setCurrentProvider(foundProvider);
     }
   };
+
+  const sortedByValue = sortByValue(sortedTariffsData, sortValue);
+
+  const { paintLowerPrice } = tariffsPriceDetails(tariffsData);
+  const { paintHighestSpeed } = tariffsInternetDetails(tariffsData);
+  const { paintHighestTV_Channels } = tariffsTV_Details(tariffsData);
+  const { paintHighestTV_HD_Channels, tariffsWithHighestTV_HD_Channels } =
+    tariffsTV_HD_Details(tariffsData);
 
   return (
     <Container>
@@ -82,8 +101,7 @@ function Page() {
           value={currentProvider?.id || 0}
           onChange={handleChange}
           label="Provider"
-          MenuProps={{ classes: { paper: classes.menuPaper } }}
-        >
+          MenuProps={{ classes: { paper: classes.menuPaper } }}>
           <MenuItem value="0">
             <em>None</em>
           </MenuItem>
@@ -100,20 +118,94 @@ function Page() {
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell>Название тарифа</TableCell>
+              <TableCell
+                style={{ cursor: 'pointer' }}
+                onClick={() => setSortValue('')}>
+                Название тарифа &#8634;
+              </TableCell>
+              <TableCell
+                style={{ cursor: 'pointer' }}
+                onClick={() =>
+                  setSortValue((current) =>
+                    toggleValue(current, 'priceUp', 'priceDown')
+                  )
+                }>
+                Цена &#10606;
+              </TableCell>
+              <TableCell
+                style={{ cursor: 'pointer' }}
+                onClick={() =>
+                  setSortValue((current) =>
+                    toggleValue(current, 'internetSpeedDown', 'internetSpeedUp')
+                  )
+                }>
+                Интернет &#10606;
+              </TableCell>
+              <TableCell
+                style={{ cursor: 'pointer' }}
+                onClick={() =>
+                  setSortValue((current) =>
+                    toggleValue(current, 'tvChannelsDown', 'tvChannelsUp')
+                  )
+                }>
+                TV &#10606;
+              </TableCell>
+              <TableCell
+                style={{ cursor: 'pointer' }}
+                onClick={() => {
+                  if (tariffsWithHighestTV_HD_Channels.length > 0) {
+                    // проверка что у провайдера есть HD-TV, если нет то сортировка не выполняется
+                    setSortValue((current) =>
+                      toggleValue(
+                        current,
+                        'tvChannels_hdDown',
+                        'tvChannels_hdUp'
+                      )
+                    );
+                  }
+                }}>
+                TV HD &#10606;
+              </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {tariffsData.map((tariff) => (
+            {sortedByValue.map((tariff) => (
               <TableRow key={tariff.id}>
                 <TableCell component="th" scope="row">
                   {tariff.name}
+                </TableCell>
+                <TableCell
+                  style={paintLowerPrice(tariff.displayPrice)}
+                  component="th"
+                  scope="row">
+                  {tariff.displayPrice}
+                </TableCell>
+                <TableCell
+                  style={paintHighestSpeed(tariff.internet.speed_in)}
+                  component="th"
+                  scope="row">
+                  {tariff.internet.speed_in}
+                </TableCell>
+                <TableCell
+                  style={paintHighestTV_Channels(tariff?.tv?.channels)}
+                  component="th"
+                  scope="row">
+                  {tariff?.tv?.channels ? tariff.tv.channels : '-'}
+                </TableCell>
+                <TableCell
+                  style={paintHighestTV_HD_Channels(tariff?.tv?.channels_hd)}
+                  component="th"
+                  scope="row">
+                  {tariff?.tv?.channels_hd ? tariff.tv.channels_hd : '-'}
                 </TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
       </TableContainer>
+
+      {/* таблица лучших тарифов */}
+      {currentProvider?.id && <BestTariffs tariffsData={tariffsData} />}
     </Container>
   );
 }
