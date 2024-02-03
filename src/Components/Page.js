@@ -24,7 +24,7 @@ import { tariffsInternetDetails } from '../utils/tariffsDetails/tariffsInternetD
 import { tariffsTV_Details } from '../utils/tariffsDetails/tariffsTV_Details';
 import { tariffsTV_HD_Details } from '../utils/tariffsDetails/tariffsTV_HD_Details';
 import { sortTariffsData } from '../utils/sort/sortTariffsData';
-import { sortByValue } from '../utils/sort/sortByValue';
+import { sortByValue } from '../utils/sort/sortByValue/sortByValue';
 import { toggleValue } from '../utils/toggleValue';
 import BestTariffs from './BestTariffs';
 
@@ -42,6 +42,7 @@ const useStyles = makeStyles((theme) => ({
     maxHeight: 500,
   },
 }));
+
 
 function Page() {
   const classes = useStyles();

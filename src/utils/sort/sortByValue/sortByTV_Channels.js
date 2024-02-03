@@ -1,4 +1,4 @@
-export const sortByTV_Channels_hdUp = (a, b) => {
+export const sortByTV_Channels = (a, b) => {
   if (typeof a?.tv?.channels === 'undefined') {
     return -1;
   }
