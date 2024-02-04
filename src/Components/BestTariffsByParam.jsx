@@ -13,10 +13,10 @@ function BestTariffsByParam(props) {
   const { title, bestTariffsArr } = props;
   return (
     <>
-      <Typography variant="h5" component="h2">
+      <Typography style={{marginTop: '30px'}} variant="h5" component="h2">
         {title}
       </Typography>
-      <TableContainer component={Paper}>
+      <TableContainer style={{marginTop: '10px'}} component={Paper}>
         <Table>
           <TableBody>
             {bestTariffsArr.map((tariff) => (

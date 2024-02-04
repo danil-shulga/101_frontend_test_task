@@ -17,7 +17,7 @@ function BestTariffs(props) {
 
   return (
     <>
-      <Typography variant="h4" component="h2">
+      <Typography style={{marginTop: '60px'}} variant="h4" component="h2">
         Лучшие в своем роде
       </Typography>
 
