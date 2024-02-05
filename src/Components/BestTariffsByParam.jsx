@@ -16,7 +16,7 @@ function BestTariffsByParam(props) {
       <Typography style={{marginTop: '30px'}} variant="h5" component="h2">
         {title}
       </Typography>
-      <TableContainer style={{marginTop: '10px'}} component={Paper}>
+      <TableContainer style={{marginTop: '15px'}} component={Paper}>
         <Table>
           <TableBody>
             {bestTariffsArr.map((tariff) => (
